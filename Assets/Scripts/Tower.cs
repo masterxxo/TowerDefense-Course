@@ -4,20 +4,28 @@ using UnityEngine;
 public class Tower : MonoBehaviour
 {
    public Transform currentEnemy;
+
+   [SerializeField] protected float attackCooldown = 1f;
+   protected float LastTimeAttacked;
    
    [Header("Tower Setup")]
-   [SerializeField] private Transform towerHead;
+   [SerializeField] protected Transform towerHead;
 
-   [SerializeField] private float rotationSpeed;
-   [SerializeField] private float attackRange = 1.5f;
-   [SerializeField] private LayerMask whatIsEnemy;
+   [SerializeField] protected float rotationSpeed = 10f;
+   [SerializeField] protected float attackRange = 2.5f;
+   [SerializeField] protected LayerMask whatIsEnemy;
 
-   private void Update()
+   protected virtual void Update()
    {
       if (currentEnemy == null)
       {
          currentEnemy = FindRandomEnemyWithinRange();
          return;
+      }
+
+      if (CanAttack())
+      {
+         Attack();
       }
 
       if (Vector3.Distance(currentEnemy.position, transform.position) > attackRange)
@@ -28,7 +36,28 @@ public class Tower : MonoBehaviour
       RotateTowardsEnemy();
    }
 
-   private Transform FindRandomEnemyWithinRange()
+   protected virtual void Attack()
+   {
+      Debug.Log("Attacking");
+   }
+
+   protected bool CanAttack()
+   {
+      if (currentEnemy == null)
+      {
+         return false;
+      }
+      
+      if (Time.time > LastTimeAttacked + attackCooldown)
+      {
+         LastTimeAttacked = Time.time;
+         return true;
+      }
+      
+      return false;
+   }
+
+   protected Transform FindRandomEnemyWithinRange()
    {
       List<Transform> possibleTargets = new List<Transform>();
       Collider[] enemiesAround = Physics.OverlapSphere(transform.position, attackRange, whatIsEnemy);
@@ -45,7 +74,7 @@ public class Tower : MonoBehaviour
       return possibleTargets[Random.Range(0, possibleTargets.Count)];
    }
 
-   private void RotateTowardsEnemy()
+   protected virtual void RotateTowardsEnemy()
    {
       if (currentEnemy == null)
       {
@@ -60,7 +89,7 @@ public class Tower : MonoBehaviour
       towerHead.rotation = Quaternion.Euler(rotation);
    }
 
-   private void OnDrawGizmos()
+   protected virtual void OnDrawGizmos()
    {
       Gizmos.DrawWireSphere(transform.position, attackRange);
    }
