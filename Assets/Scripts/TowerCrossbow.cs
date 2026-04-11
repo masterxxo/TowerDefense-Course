@@ -20,9 +20,9 @@ public class TowerCrossbow : Tower
         if (Physics.Raycast(gunPoint.position, directionToEnemy, out RaycastHit hitInfo, Mathf.Infinity))
         {
             towerHead.forward = directionToEnemy;
-            Debug.Log(hitInfo.collider.gameObject.name + " was attacked!");
             Debug.DrawLine(gunPoint.position, hitInfo.point, Color.red);
             visuals.PlayAttackVFX(gunPoint.position, hitInfo.point);
+            visuals.PlayReloadFX(attackCooldown);
         }
     }
 }
