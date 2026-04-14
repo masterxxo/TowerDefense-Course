@@ -71,19 +71,46 @@ public class Tower : MonoBehaviour
 
    protected Transform FindRandomEnemyWithinRange()
    {
-      List<Transform> possibleTargets = new List<Transform>();
+      List<Enemy> enemiesInRange = new List<Enemy>();
+      Enemy fastestEnemy = null;
       Collider[] enemiesAround = Physics.OverlapSphere(transform.position, attackRange, whatIsEnemy);
       foreach (Collider enemy in enemiesAround)
       {
-         possibleTargets.Add(enemy.transform);
+         Enemy newEnemyComponent = enemy.GetComponent<Enemy>();
+         enemiesInRange.Add(newEnemyComponent);
       }
 
-      if (possibleTargets.Count <= 0)
+      if (enemiesInRange.Count <= 0)
       {
          return null;
       }
       
-      return possibleTargets[Random.Range(0, possibleTargets.Count)];
+      fastestEnemy = GetMostAdvancedEnemy(enemiesInRange);
+
+      if (fastestEnemy != null)
+      {
+         return fastestEnemy.transform;
+      }
+
+      return null;
+   }
+
+   private Enemy GetMostAdvancedEnemy(List<Enemy> targets)
+   {
+      float fastestEnemyDistance = float.MaxValue;
+      Enemy fastestEnemy = null;
+      
+      foreach (Enemy enemy in targets)
+      {
+         float currentDistance = enemy.DistanceToFinishLine();
+         if (currentDistance < fastestEnemyDistance)
+         {
+            fastestEnemyDistance = currentDistance;
+            fastestEnemy = enemy;
+         }
+      }
+
+      return fastestEnemy;
    }
 
    protected virtual void RotateTowardsEnemy()

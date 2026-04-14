@@ -5,12 +5,12 @@ public class Enemy : MonoBehaviour, IDamagable
 {
     public int healthPoints = 4;
     private NavMeshAgent _agent;
-    
-    [Header("Movement")]
-    [SerializeField] private float turnSpeed = 10f;
-    private Transform[] _waypoints;
 
+    [Header("Movement")] [SerializeField] private float turnSpeed = 10f;
+    private Transform[] _waypoints;
     private int _waypointIndex = 0;
+
+    private float _totalDistance;
 
     private void Awake()
     {
@@ -23,6 +23,7 @@ public class Enemy : MonoBehaviour, IDamagable
     private void Start()
     {
         _waypoints = FindAnyObjectByType<WaypointManager>().GetWaypoints();
+        CalculateTotalDistance();
     }
 
     private void Update()
@@ -33,6 +34,11 @@ public class Enemy : MonoBehaviour, IDamagable
             _agent.SetDestination(GetNextWaypoint());
         }
         //_agent.SetDestination(waypoint.position);
+    }
+
+    public float DistanceToFinishLine()
+    {
+        return _totalDistance + _agent.remainingDistance;
     }
 
     private void FaceTarget(Vector3 newTarget)
@@ -53,9 +59,25 @@ public class Enemy : MonoBehaviour, IDamagable
         }
         
         Vector3 targetPoint = _waypoints[_waypointIndex].position;
+
+        if (_waypointIndex > 0)
+        {
+            float distance = Vector3.Distance(_waypoints[_waypointIndex].position, _waypoints[_waypointIndex - 1].position);
+            _totalDistance -= distance;
+        }
+        
         _waypointIndex++;
 
         return targetPoint;
+    }
+    
+    private void CalculateTotalDistance()
+    {
+        for (int i = 0; i < _waypoints.Length - 1; i++)
+        {
+            float distance = Vector3.Distance(_waypoints[i].position, _waypoints[i + 1].position);
+            _totalDistance += distance;
+        }
     }
 
     public void TakeDamage(int damage)
