@@ -3,7 +3,6 @@ using UnityEngine;
 
 public class CrossbowVisuals : MonoBehaviour
 {
-    private TowerCrossbow _crossbow;
     private Enemy _currentEnemy;
     [SerializeField] private LineRenderer attackVisuals;
     [SerializeField] private float attackVisualDuration = .1f;
@@ -49,7 +48,6 @@ public class CrossbowVisuals : MonoBehaviour
     [SerializeField] private LineRenderer[] lineRenderers;
     private void Awake()
     {
-        _crossbow = GetComponent<TowerCrossbow>();
         _material = new Material(meshRenderer.material);
         meshRenderer.material = _material;
         
@@ -69,10 +67,14 @@ public class CrossbowVisuals : MonoBehaviour
     {
         UpdateEmissionColor();
         UpdateStrings();
+        UpdateAttackVisualsIfNeeded();
+    }
 
+    private void UpdateAttackVisualsIfNeeded()
+    {
         if (attackVisuals.enabled && _currentEnemy != null)
         {
-          attackVisuals.SetPosition(1, _currentEnemy.GetCenterPoint());  
+            attackVisuals.SetPosition(1, _currentEnemy.GetCenterPoint());  
         }
     }
 
@@ -84,7 +86,7 @@ public class CrossbowVisuals : MonoBehaviour
         UpdateStringVisual(backStringR, backStartPointR, backEndPointR);
     }
 
-    public void PlayReloadFX(float duration)
+    public void PlayReloadVFX(float duration)
     {
         float halfDuration = duration / 2;
         StartCoroutine(ChangeEmission(halfDuration));
@@ -98,15 +100,14 @@ public class CrossbowVisuals : MonoBehaviour
         _material.SetColor("_EmissionColor", emissionColor);
     }
     
-    public void PlayAttackVFX(Vector3 startPoint, Vector3 endPoint)
+    public void PlayAttackVFX(Vector3 startPoint, Vector3 endPoint, Enemy newEnemy)
     {
-        StartCoroutine(VFXCoroutine(startPoint, endPoint));
+        StartCoroutine(VFXCoroutine(startPoint, endPoint, newEnemy));
     }
 
-    private IEnumerator VFXCoroutine(Vector3 startPoint, Vector3 endPoint)
+    private IEnumerator VFXCoroutine(Vector3 startPoint, Vector3 endPoint, Enemy newEnemy)
     {
-        //_crossbow.EnableRotation(false);
-        _currentEnemy = _crossbow.currentEnemy;
+        _currentEnemy = newEnemy;
         attackVisuals.enabled = true;
         attackVisuals.SetPosition(0, startPoint);
         attackVisuals.SetPosition(1, endPoint);
@@ -114,7 +115,6 @@ public class CrossbowVisuals : MonoBehaviour
         yield return new WaitForSeconds(attackVisualDuration);
         
         attackVisuals.enabled = false;
-        //_crossbow.EnableRotation(true);
     }
 
     private IEnumerator ChangeEmission(float duration)

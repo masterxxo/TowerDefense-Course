@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class TowerCrossbow : Tower
 {
-    private CrossbowVisuals visuals;
+    private CrossbowVisuals _visuals;
     
     [Header("Crossbow Details")] 
     [SerializeField] private Transform gunPoint;
@@ -11,7 +11,7 @@ public class TowerCrossbow : Tower
     protected override void Awake()
     {
         base.Awake();
-        visuals = GetComponent<CrossbowVisuals>();
+        _visuals = GetComponent<CrossbowVisuals>();
     }
     
     protected override void Attack()
@@ -21,14 +21,18 @@ public class TowerCrossbow : Tower
         if (Physics.Raycast(gunPoint.position, directionToEnemy, out RaycastHit hitInfo, Mathf.Infinity))
         {
             towerHead.forward = directionToEnemy;
-            visuals.PlayAttackVFX(gunPoint.position, hitInfo.point);
-            visuals.PlayReloadFX(attackCooldown);
-            
+
+            Enemy enemyTarget = null;
             IDamagable damagable = hitInfo.collider.GetComponent<IDamagable>();
+            
             if (damagable != null)
             {
                 damagable.TakeDamage(damage);
+                enemyTarget = currentEnemy;
             }
+
+            _visuals.PlayAttackVFX(gunPoint.position, hitInfo.point, enemyTarget);
+            _visuals.PlayReloadVFX(attackCooldown);
         }
     }
 }
