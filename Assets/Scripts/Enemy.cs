@@ -1,8 +1,17 @@
 using UnityEngine;
 using UnityEngine.AI;
 
+public enum EnemyType
+{
+    Basic,
+    Fast,
+    None
+}
+
 public class Enemy : MonoBehaviour, IDamagable
 {
+    [SerializeField] private EnemyType enemyType;
+    [SerializeField] private Transform centerPoint;
     public int healthPoints = 4;
     private NavMeshAgent _agent;
 
@@ -78,6 +87,16 @@ public class Enemy : MonoBehaviour, IDamagable
             float distance = Vector3.Distance(_waypoints[i].position, _waypoints[i + 1].position);
             _totalDistance += distance;
         }
+    }
+
+    public Vector3 GetCenterPoint()
+    {
+        return centerPoint.position;
+    }
+
+    public EnemyType GetEnemyType()
+    {
+        return enemyType;
     }
 
     public void TakeDamage(int damage)

@@ -3,25 +3,33 @@ using UnityEngine;
 
 public class Tower : MonoBehaviour
 {
-   public Transform currentEnemy;
+   public Enemy currentEnemy;
 
    [SerializeField] protected float attackCooldown = 1f;
    protected float LastTimeAttacked;
-   
+
    [Header("Tower Setup")]
+   [SerializeField] protected EnemyType enemyPriorityType = EnemyType.None;
    [SerializeField] protected Transform towerHead;
 
    [SerializeField] protected float rotationSpeed = 10f;
    [SerializeField] protected float attackRange = 2.5f;
    [SerializeField] protected LayerMask whatIsEnemy;
 
+   [Space]
+   [Tooltip("Enabling ths allows tower to change target between attacks")]
+   [SerializeField] private bool dynamicTargetChange = false;
+   private float _targetCheckInterval = .1f;
+   private float _lastTimeChecked;
+
    private bool _canRotate;
 
    protected virtual void Update()
    {
+      UpdateTargetIfNeeded();
       if (currentEnemy == null)
       {
-         currentEnemy = FindRandomEnemyWithinRange();
+         currentEnemy = FindEnemyWithinRange();
          return;
       }
 
@@ -30,7 +38,7 @@ public class Tower : MonoBehaviour
          Attack();
       }
 
-      if (Vector3.Distance(currentEnemy.position, transform.position) > attackRange)
+      if (Vector3.Distance(currentEnemy.GetCenterPoint(), transform.position) > attackRange)
       {
          currentEnemy = null;
       }
@@ -40,7 +48,21 @@ public class Tower : MonoBehaviour
 
    protected virtual void Awake()
    {
-      
+      EnableRotation(true);
+   }
+
+   private void UpdateTargetIfNeeded()
+   {
+      if (!dynamicTargetChange)
+      {
+         return;
+      }
+
+      if (Time.time > _lastTimeChecked + _targetCheckInterval)
+      {
+         _lastTimeChecked = Time.time;
+         currentEnemy = FindEnemyWithinRange();
+      }
    }
 
    protected virtual void Attack()
@@ -69,27 +91,35 @@ public class Tower : MonoBehaviour
       return false;
    }
 
-   protected Transform FindRandomEnemyWithinRange()
+   protected Enemy FindEnemyWithinRange()
    {
+      List<Enemy> priorityTargets = new List<Enemy>();
       List<Enemy> enemiesInRange = new List<Enemy>();
-      Enemy fastestEnemy = null;
       Collider[] enemiesAround = Physics.OverlapSphere(transform.position, attackRange, whatIsEnemy);
       foreach (Collider enemy in enemiesAround)
       {
          Enemy newEnemyComponent = enemy.GetComponent<Enemy>();
-         enemiesInRange.Add(newEnemyComponent);
-      }
-
-      if (enemiesInRange.Count <= 0)
-      {
-         return null;
+         EnemyType newEnemyType = newEnemyComponent.GetEnemyType();
+         if (newEnemyType == enemyPriorityType)
+         {
+            priorityTargets.Add(newEnemyComponent);
+         }
+         else
+         {
+            enemiesInRange.Add(newEnemyComponent);
+         }
+         
       }
       
-      fastestEnemy = GetMostAdvancedEnemy(enemiesInRange);
-
-      if (fastestEnemy != null)
+      
+      if (priorityTargets.Count > 0)
       {
-         return fastestEnemy.transform;
+         return GetMostAdvancedEnemy(priorityTargets);
+      }
+
+      if (enemiesInRange.Count > 0)
+      {
+         return GetMostAdvancedEnemy(enemiesInRange);
       }
 
       return null;
@@ -124,8 +154,8 @@ public class Tower : MonoBehaviour
       {
          return;
       }
-      
-      Vector3 directionToEnemy = currentEnemy.position - towerHead.position;
+
+      Vector3 directionToEnemy = DirectionToEnemy(towerHead);
 
       Quaternion lookRotation = Quaternion.LookRotation(directionToEnemy);
       
@@ -135,7 +165,7 @@ public class Tower : MonoBehaviour
 
    protected Vector3 DirectionToEnemy(Transform startPoint)
    {
-      return (currentEnemy.position - startPoint.position).normalized;
+      return (currentEnemy.GetCenterPoint() - startPoint.position).normalized;
    }
 
    protected virtual void OnDrawGizmos()
