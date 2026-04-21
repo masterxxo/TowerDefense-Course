@@ -34,9 +34,30 @@ public class TileSlotEditor : Editor
         GUILayout.EndHorizontal();
         GUILayout.BeginHorizontal();
         
-        if (GUILayout.Button("Sideway", GUILayout.Width(buttonWidth)))
+        if (GUILayout.Button("Sideway", GUILayout.Width(buttonWidth * 2)))
         {
             GameObject newTile = FindFirstObjectByType<TileSetHolder>().tileSideway;
+            foreach (var targetTile in targets)
+            {
+                ((TileSlot)targetTile).SwitchTile(newTile);
+            }
+        }
+        
+        GUILayout.EndHorizontal();
+        GUILayout.BeginHorizontal();
+
+        if (GUILayout.Button("Inner corner", GUILayout.Width(buttonWidth)))
+        {
+            GameObject newTile = FindFirstObjectByType<TileSetHolder>().tileInnerCorner;
+            foreach (var targetTile in targets)
+            {
+                ((TileSlot)targetTile).SwitchTile(newTile);
+            }
+        }
+        
+        if (GUILayout.Button("Outer corner", GUILayout.Width(buttonWidth)))
+        {
+            GameObject newTile = FindFirstObjectByType<TileSetHolder>().tileOuterCorner;
             foreach (var targetTile in targets)
             {
                 ((TileSlot)targetTile).SwitchTile(newTile);
