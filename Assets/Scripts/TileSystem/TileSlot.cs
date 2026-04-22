@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.AI.Navigation;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -7,6 +8,7 @@ public class TileSlot : MonoBehaviour
     private MeshRenderer meshRenderer => GetComponent<MeshRenderer>();
     private MeshFilter meshFilter => GetComponent<MeshFilter>();
     private  Collider myCollider => GetComponent<Collider>();
+    private NavMeshSurface levelNavMesh => GetComponentInParent<NavMeshSurface>();
     public void SwitchTile(GameObject referenceTile)
     {
         gameObject.name = referenceTile.name;
@@ -16,16 +18,9 @@ public class TileSlot : MonoBehaviour
         meshRenderer.material = newTile.GetMaterial();
         
         UpdateCollider(newTile.GetCollider());
-
-        foreach (GameObject obj in GetAllChildren())
-        {
-            DestroyImmediate(obj);
-        }
-
-        foreach (GameObject obj in newTile.GetAllChildren())
-        {
-            Instantiate(obj, transform);
-        }
+        UpdateChildren(newTile);
+        UpdateLayer(referenceTile);
+        UpdateNavMesh();
     }
 
     public Material GetMaterial() => meshRenderer.sharedMaterial;
@@ -43,6 +38,8 @@ public class TileSlot : MonoBehaviour
 
         return children;
     }
+    
+    private void UpdateNavMesh() => levelNavMesh.BuildNavMesh();
 
     public void UpdateCollider(Collider newCollider)
     {
@@ -66,6 +63,30 @@ public class TileSlot : MonoBehaviour
         }
     }
 
-    public void RotateTile(int dir) => transform.Rotate(0, 90 * dir, 0);
-    public void AdjustY(int verticalDir) => transform.position += new Vector3(0, .1f * verticalDir, 0);
+    private void UpdateChildren(TileSlot newTile)
+    {
+        foreach (GameObject obj in GetAllChildren())
+        {
+            DestroyImmediate(obj);
+        }
+
+        foreach (GameObject obj in newTile.GetAllChildren())
+        {
+            Instantiate(obj, transform);
+        }
+    }
+    
+    public void UpdateLayer(GameObject referenceTile) => gameObject.layer = referenceTile.layer;
+
+    public void RotateTile(int dir)
+    {
+        transform.Rotate(0, 90 * dir, 0);
+        UpdateNavMesh();
+    }
+
+    public void AdjustY(int verticalDir)
+    {
+        transform.position += new Vector3(0, .1f * verticalDir, 0);
+        UpdateNavMesh();
+    } 
 }
