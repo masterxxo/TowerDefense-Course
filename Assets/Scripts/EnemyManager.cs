@@ -9,46 +9,38 @@ public class WaveDetails
 }
 public class EnemyManager : MonoBehaviour
 {
+    public List<EnemyPortal> enemyPortals;
     [SerializeField] private WaveDetails currentWave;
     [Space]
-    [SerializeField] private Transform respawnPoint;
-    [SerializeField] private float spawnCooldown;
-    private float _spawnTimer;
-    
-    private List<GameObject> _enemiesToCreate;
+
     [Header("Enemies Prefabs")]
     [SerializeField] private GameObject basicEnemy;
     [SerializeField] private GameObject fastEnemy;
 
-    private void Start()
+    private void Awake()
     {
-        _enemiesToCreate = NewEnemyWave();
+        enemyPortals = new List<EnemyPortal>( FindObjectsByType<EnemyPortal>() );
     }
-    
-    private void Update()
-    {
-        _spawnTimer -= Time.deltaTime;
 
-        if (_spawnTimer <= 0 && _enemiesToCreate.Count > 0)
+    [ContextMenu("Setup new Wave")]
+    private void SetupNextWave()
+    {
+        List<GameObject> newEnemies = NewEnemyWave();
+        int portalIndex = 0;
+
+        for (int i = 0; i < newEnemies.Count; i++)
         {
-            CreateEnemy();
-            _spawnTimer = spawnCooldown;
+            GameObject enemyToAdd = newEnemies[i];
+            EnemyPortal portalToSpawnEnemy = enemyPortals[portalIndex];
+            
+            portalToSpawnEnemy.GetEnemyList().Add(enemyToAdd);
+            portalIndex++;
+
+            if (portalIndex >= enemyPortals.Count)
+            {
+                portalIndex = 0;
+            }
         }
-    }
-
-    private void CreateEnemy()
-    {
-        GameObject randomEnemy = GetRandomEnemy();
-        GameObject newEnemy = Instantiate(randomEnemy, respawnPoint.position, Quaternion.identity);
-    }
-
-    private GameObject GetRandomEnemy()
-    {
-        int randomIndex = Random.Range(0, _enemiesToCreate.Count);
-        GameObject chosenEnemy = _enemiesToCreate[randomIndex];
-        _enemiesToCreate.RemoveAt(randomIndex);
-
-        return chosenEnemy;
     }
 
     private List<GameObject> NewEnemyWave()
