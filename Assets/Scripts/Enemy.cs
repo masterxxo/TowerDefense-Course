@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -16,7 +17,7 @@ public class Enemy : MonoBehaviour, IDamagable
     private NavMeshAgent _agent;
 
     [Header("Movement")] [SerializeField] private float turnSpeed = 10f;
-    private Transform[] _waypoints;
+    [SerializeField] private List<Transform> enemyWaypoints;
     private int _waypointIndex = 0;
 
     private float _totalDistance;
@@ -31,7 +32,17 @@ public class Enemy : MonoBehaviour, IDamagable
 
     private void Start()
     {
-        _waypoints = FindAnyObjectByType<WaypointManager>().GetWaypoints();
+        CalculateTotalDistance();
+    }
+
+    public void SetupEnemy(List<Waypoint> newWaypoints)
+    {
+        enemyWaypoints = new List<Transform>();
+        foreach (Waypoint waypoint in newWaypoints)
+        {
+            enemyWaypoints.Add(waypoint.transform);
+        }
+        
         CalculateTotalDistance();
     }
 
@@ -62,16 +73,16 @@ public class Enemy : MonoBehaviour, IDamagable
 
     private Vector3 GetNextWaypoint()
     {
-        if (_waypointIndex >= _waypoints.Length)
+        if (_waypointIndex >= enemyWaypoints.Count)
         {
             return transform.position;
         }
         
-        Vector3 targetPoint = _waypoints[_waypointIndex].position;
+        Vector3 targetPoint = enemyWaypoints[_waypointIndex].position;
 
         if (_waypointIndex > 0)
         {
-            float distance = Vector3.Distance(_waypoints[_waypointIndex].position, _waypoints[_waypointIndex - 1].position);
+            float distance = Vector3.Distance(enemyWaypoints[_waypointIndex].position, enemyWaypoints[_waypointIndex - 1].position);
             _totalDistance -= distance;
         }
         
@@ -82,9 +93,9 @@ public class Enemy : MonoBehaviour, IDamagable
     
     private void CalculateTotalDistance()
     {
-        for (int i = 0; i < _waypoints.Length - 1; i++)
+        for (int i = 0; i < enemyWaypoints.Count - 1; i++)
         {
-            float distance = Vector3.Distance(_waypoints[i].position, _waypoints[i + 1].position);
+            float distance = Vector3.Distance(enemyWaypoints[i].position, enemyWaypoints[i + 1].position);
             _totalDistance += distance;
         }
     }
