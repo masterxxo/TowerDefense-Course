@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -18,7 +19,8 @@ public class Enemy : MonoBehaviour, IDamagable
 
     [Header("Movement")] [SerializeField] private float turnSpeed = 10f;
     [SerializeField] private List<Transform> enemyWaypoints;
-    private int _waypointIndex = 0;
+    private int _nextWaypointIndex = 0;
+    private int _currentWaypointIndex = 0;
 
     private float _totalDistance;
 
@@ -49,11 +51,30 @@ public class Enemy : MonoBehaviour, IDamagable
     private void Update()
     {
         FaceTarget(_agent.steeringTarget);
-        if (_agent.remainingDistance <= 0.25f)
+        if ( ShouldUpdateWaypoint())
         {
             _agent.SetDestination(GetNextWaypoint());
         }
         //_agent.SetDestination(waypoint.position);
+    }
+
+    private bool ShouldUpdateWaypoint()
+    {
+        if (_nextWaypointIndex >= enemyWaypoints.Count)
+        {
+            return false;
+        }
+
+        if (_agent.remainingDistance <= 0.5f)
+            return true;
+        
+        Vector3 currentWaypoint = enemyWaypoints[_currentWaypointIndex].position;
+        Vector3 nextWaypoint = enemyWaypoints[_nextWaypointIndex].position;
+        
+        float distanceToNextWaypoint = Vector3.Distance(transform.position, nextWaypoint);
+        float distanceBetweenWaypoints = Vector3.Distance(currentWaypoint, nextWaypoint);
+
+        return distanceBetweenWaypoints > distanceToNextWaypoint;
     }
 
     public float DistanceToFinishLine()
@@ -73,20 +94,21 @@ public class Enemy : MonoBehaviour, IDamagable
 
     private Vector3 GetNextWaypoint()
     {
-        if (_waypointIndex >= enemyWaypoints.Count)
+        if (_nextWaypointIndex >= enemyWaypoints.Count)
         {
             return transform.position;
         }
         
-        Vector3 targetPoint = enemyWaypoints[_waypointIndex].position;
+        Vector3 targetPoint = enemyWaypoints[_nextWaypointIndex].position;
 
-        if (_waypointIndex > 0)
+        if (_nextWaypointIndex > 0)
         {
-            float distance = Vector3.Distance(enemyWaypoints[_waypointIndex].position, enemyWaypoints[_waypointIndex - 1].position);
+            float distance = Vector3.Distance(enemyWaypoints[_nextWaypointIndex].position, enemyWaypoints[_nextWaypointIndex - 1].position);
             _totalDistance -= distance;
         }
         
-        _waypointIndex++;
+        _nextWaypointIndex++;
+        _currentWaypointIndex = _nextWaypointIndex - 1;
 
         return targetPoint;
     }

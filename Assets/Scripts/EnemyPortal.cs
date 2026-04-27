@@ -3,15 +3,17 @@ using UnityEngine;
 
 public class EnemyPortal : MonoBehaviour
 {
-    [SerializeField] private List<Waypoint> waypoints;
     [SerializeField] private float spawnCooldown;
     private float _spawnTimer;
     
-    private List<GameObject> _enemiesToCreate;
+    [Space]
+    
+    [SerializeField] private List<Waypoint> waypoints;
+    
+    private List<GameObject> _enemiesToCreate = new List<GameObject>();
 
     private void Awake()
     {
-        _enemiesToCreate = new List<GameObject>();
         CollectWaypoints();
     }
 
@@ -53,7 +55,7 @@ public class EnemyPortal : MonoBehaviour
         return chosenEnemy;
     }
 
-    public List<GameObject> GetEnemyList() => _enemiesToCreate;
+    public void AddEnemy(GameObject enemyToAdd) => _enemiesToCreate.Add(enemyToAdd);
 
     [ContextMenu("Collect Waypoints")]
     private void CollectWaypoints()

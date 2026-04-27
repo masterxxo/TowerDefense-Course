@@ -22,6 +22,11 @@ public class EnemyManager : MonoBehaviour
         enemyPortals = new List<EnemyPortal>( FindObjectsByType<EnemyPortal>() );
     }
 
+    private void Start()
+    {
+        SetupNextWave();
+    }
+
     [ContextMenu("Setup new Wave")]
     private void SetupNextWave()
     {
@@ -33,7 +38,7 @@ public class EnemyManager : MonoBehaviour
             GameObject enemyToAdd = newEnemies[i];
             EnemyPortal portalToSpawnEnemy = enemyPortals[portalIndex];
             
-            portalToSpawnEnemy.GetEnemyList().Add(enemyToAdd);
+            portalToSpawnEnemy.AddEnemy(enemyToAdd);
             portalIndex++;
 
             if (portalIndex >= enemyPortals.Count)
