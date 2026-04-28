@@ -11,6 +11,7 @@ public class EnemyPortal : MonoBehaviour
     [SerializeField] private List<Waypoint> waypoints;
     
     private List<GameObject> _enemiesToCreate = new List<GameObject>();
+    private List<GameObject> _activeEnemies = new List<GameObject>();
 
     private void Awake()
     {
@@ -43,7 +44,8 @@ public class EnemyPortal : MonoBehaviour
         GameObject newEnemy = Instantiate(randomEnemy, transform.position, Quaternion.identity);
 
         Enemy enemyScript = newEnemy.GetComponent<Enemy>();
-        enemyScript.SetupEnemy(waypoints);
+        enemyScript.SetupEnemy(waypoints, this);
+        _activeEnemies.Add(newEnemy);
     }
     
     private GameObject GetRandomEnemy()
@@ -56,6 +58,16 @@ public class EnemyPortal : MonoBehaviour
     }
 
     public void AddEnemy(GameObject enemyToAdd) => _enemiesToCreate.Add(enemyToAdd);
+    
+    public List<GameObject> GetActiveEnemies() => _activeEnemies;
+
+    public void RemoveActiveEnemy(GameObject enemyToRemove)
+    {
+        if (_activeEnemies.Contains(enemyToRemove))
+        {
+            _activeEnemies.Remove(enemyToRemove);
+        }
+    }
 
     [ContextMenu("Collect Waypoints")]
     private void CollectWaypoints()

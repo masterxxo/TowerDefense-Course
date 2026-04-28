@@ -16,7 +16,8 @@ public class Enemy : MonoBehaviour, IDamagable
     [SerializeField] private Transform centerPoint;
     public int healthPoints = 4;
     private NavMeshAgent _agent;
-
+    private EnemyPortal _spawnPortal;
+    
     [Header("Movement")] [SerializeField] private float turnSpeed = 10f;
     [SerializeField] private List<Transform> enemyWaypoints;
     private int _nextWaypointIndex = 0;
@@ -37,7 +38,7 @@ public class Enemy : MonoBehaviour, IDamagable
         CalculateTotalDistance();
     }
 
-    public void SetupEnemy(List<Waypoint> newWaypoints)
+    public void SetupEnemy(List<Waypoint> newWaypoints, EnemyPortal enemyPortal)
     {
         enemyWaypoints = new List<Transform>();
         foreach (Waypoint waypoint in newWaypoints)
@@ -46,6 +47,7 @@ public class Enemy : MonoBehaviour, IDamagable
         }
         
         CalculateTotalDistance();
+        _spawnPortal = enemyPortal;
     }
 
     private void Update()
@@ -138,7 +140,13 @@ public class Enemy : MonoBehaviour, IDamagable
 
         if (healthPoints <= 0)
         {
-            Destroy(gameObject);
+            Die();
         }
+    }
+
+    private void Die()
+    {
+        _spawnPortal.RemoveActiveEnemy(gameObject);
+        Destroy(gameObject);
     }
 }
