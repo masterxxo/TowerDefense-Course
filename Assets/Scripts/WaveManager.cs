@@ -4,11 +4,15 @@ using UnityEngine;
 [System.Serializable]
 public class WaveDetails
 {
+    public GridBuilder nextGrid;
+    public EnemyPortal[] newPortals;
     public int basicEnemy;
     public int fastEnemy;
 }
-public class EnemyManager : MonoBehaviour
+public class WaveManager : MonoBehaviour
 {
+    [SerializeField] private GridBuilder currentGrid;
+    
     public bool waveCompleted;
     public float waveCooldown = 10;
     public float waveTimer;
@@ -45,6 +49,8 @@ public class EnemyManager : MonoBehaviour
         
         if (!waveCompleted && AllEnemiesDefeated())
         {
+            CheckForNewLevelLayout();
+            
             waveCompleted = true;
             waveTimer = waveCooldown;
         }
@@ -130,6 +136,57 @@ public class EnemyManager : MonoBehaviour
         _waveIndex++;
         
         return enemies;
+    }
+
+    private void CheckForNewLevelLayout()
+    {
+        if (_waveIndex >= levelWaves.Length)
+            return;
+        WaveDetails nextWave = levelWaves[_waveIndex];
+
+        if (nextWave.nextGrid != null)
+        {
+            UpdateLevelTile(nextWave.nextGrid);
+            EnableNewPortals(nextWave.newPortals);
+        }
+        
+        currentGrid.UpdateNavMesh();
+    }
+
+    private void UpdateLevelTile(GridBuilder nextGrid)
+    {
+        List<GameObject> grid = currentGrid.GetTileSetup();
+        List<GameObject> newGrid = nextGrid.GetTileSetup();
+        for (int i = 0; i < grid.Count; i++)
+        {
+            TileSlot currentTile = grid[i].GetComponent<TileSlot>();
+            TileSlot newTile = newGrid[i].GetComponent<TileSlot>();
+            
+            bool shouldBeUpdated = currentTile.GetMesh() != newTile.GetMesh() || 
+                                   currentTile.GetMaterial() != newTile.GetMaterial() || 
+                                   currentTile.GetAllChildren().Count != newTile.GetAllChildren().Count ||
+                                   currentTile.transform.rotation != newTile.transform.rotation;
+
+            if (shouldBeUpdated)
+            {
+                currentTile.gameObject.SetActive(false);
+                
+                newTile.gameObject.SetActive(true);
+                newTile.transform.parent = currentGrid.transform;
+
+                grid[i] = newTile.gameObject;
+                Destroy(currentTile.gameObject);
+            }
+        }
+    }
+    
+    private void EnableNewPortals(EnemyPortal[] newPortals)
+    {
+        foreach (EnemyPortal portal in newPortals)
+        {
+            portal.gameObject.SetActive(true);
+            _enemyPortals.Add(portal);
+        }
     }
 
     private bool AllEnemiesDefeated()

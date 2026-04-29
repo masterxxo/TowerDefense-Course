@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.AI.Navigation;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -8,6 +9,11 @@ public class GridBuilder : MonoBehaviour
     [SerializeField] private int gridLength = 10;
     [SerializeField] private int gridWidth = 10;
     [SerializeField] private List<GameObject> createdTiles;
+    
+    public List<GameObject> GetTileSetup() => createdTiles;
+    private NavMeshSurface _gridNavmeshSurface => GetComponent<NavMeshSurface>();
+    
+    
 
     [ContextMenu("Build grid")]
     private void BuildGrid()
@@ -43,4 +49,6 @@ public class GridBuilder : MonoBehaviour
         
         createdTiles.Add(newTile);
     }
+    
+    public void UpdateNavMesh() => _gridNavmeshSurface.BuildNavMesh();
 }
