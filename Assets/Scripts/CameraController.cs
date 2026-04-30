@@ -15,16 +15,42 @@ public class CameraController : MonoBehaviour
     private float _pitch;
     [SerializeField] private float _minPitch = 5f;
     [SerializeField] private float _maxPitch = 85f;
+    
+    [Header("Zoom details")]
+    [SerializeField] private float zoomSpeed = 10f;
+    [SerializeField] private float _minZoom = 3f;
+    [SerializeField] private float _maxZoom = 15f;
 
     private float _smoothTime = 0.1f;
     private Vector3 _movementVelocity = Vector3.zero;
+    private Vector3 _zoomVelocity = Vector3.zero;
     
     void Update()
     {
         HandleRotation();
+        HandleZoom();
         HandleMovement();
         
         focusPoint.position = transform.position + (transform.forward * GetFocusPointDistance());
+    }
+
+    private void HandleZoom()
+    {
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        Vector3 zoomDirection = transform.forward * scroll * zoomSpeed;
+        Vector3 targetPosition = transform.position + zoomDirection;
+
+        if (transform.position.y < _minZoom && scroll > 0)
+        {
+            return;
+        }
+
+        if (transform.position.y > _maxZoom && scroll < 0)
+        {
+            return;
+        }
+        
+        transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref _zoomVelocity, _smoothTime);
     }
 
     private float GetFocusPointDistance()
