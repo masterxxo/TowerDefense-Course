@@ -3,8 +3,11 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
+    [Header("Movement Details")]
     [SerializeField] private float movementSpeed = 120;
+    [SerializeField] private float mouseMovementSpeed = 5; 
 
+    
     [Header("Rotation details")]
     [SerializeField] private Transform focusPoint;
     [SerializeField] private float maxFocusPointDistance = 15f;
@@ -24,11 +27,14 @@ public class CameraController : MonoBehaviour
     private float _smoothTime = 0.1f;
     private Vector3 _movementVelocity = Vector3.zero;
     private Vector3 _zoomVelocity = Vector3.zero;
+    private Vector3 _mouseMovementVelocity = Vector3.zero;
+    private Vector3 _lastMousePosition;
     
     void Update()
     {
         HandleRotation();
         HandleZoom();
+        HandleMouseMovement();
         HandleMovement();
         
         focusPoint.position = transform.position + (transform.forward * GetFocusPointDistance());
@@ -109,5 +115,29 @@ public class CameraController : MonoBehaviour
         }
         
         transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref _movementVelocity, _smoothTime);
+    }
+
+    private void HandleMouseMovement()
+    {
+        if (Input.GetMouseButtonDown(2))
+        {
+            _lastMousePosition = Input.mousePosition;
+        }
+
+        if (Input.GetMouseButton(2))
+        {
+            Vector3 positionDifference = Input.mousePosition - _lastMousePosition;
+            Vector3 moveRight = transform.right * (-positionDifference.x) * mouseMovementSpeed * Time.deltaTime;
+            Vector3 moveForward = transform.forward * (-positionDifference.y) * mouseMovementSpeed * Time.deltaTime;
+
+            moveRight.y = 0;
+            moveForward.y = 0;
+            
+            Vector3 movement = moveRight + moveForward;
+            Vector3 targetPosition = transform.position + movement;
+            
+            transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref _mouseMovementVelocity, _smoothTime);
+            _lastMousePosition = Input.mousePosition;
+        }
     }
 }
