@@ -75,6 +75,11 @@ public class CameraController : MonoBehaviour
         movementSpeed = sensitivity;
     }
 
+    public void AdjustMouseSensitivity(float sensitivity)
+    {
+        mouseMovementSpeed = sensitivity;
+    }
+
     private void HandleZoom()
     {
         float scroll = Input.GetAxis("Mouse ScrollWheel");
