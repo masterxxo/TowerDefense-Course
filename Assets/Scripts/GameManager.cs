@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    [SerializeField] private int currency;
     [SerializeField] private int _maxHP;
     [SerializeField] private int _currentHP;
     
@@ -10,7 +11,7 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
-        _uiInGame = FindAnyObjectByType<UI_InGame>();
+        _uiInGame = FindAnyObjectByType<UI_InGame>(FindObjectsInactive.Include);
     }
 
     private void Start()
@@ -23,5 +24,11 @@ public class GameManager : MonoBehaviour
     {
        _currentHP += value; 
        _uiInGame.UpdateHealthPointsUI(_currentHP, _maxHP);
+    }
+
+    public void UpdateCurrency(int value)
+    {
+        currency += value;
+        _uiInGame.UpdateCurrencyUI(currency);
     }
 }

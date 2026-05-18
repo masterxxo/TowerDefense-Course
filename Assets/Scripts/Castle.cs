@@ -7,7 +7,7 @@ public class Castle : MonoBehaviour
     {
         if (other.CompareTag("Enemy"))
         {
-            other.GetComponent<Enemy>().TakeDamage(9999);
+            other.GetComponent<Enemy>().DestroyEnemy();
             if(_gameManager == null)
                 _gameManager = FindAnyObjectByType<GameManager>();
             

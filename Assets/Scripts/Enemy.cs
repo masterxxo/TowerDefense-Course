@@ -24,6 +24,7 @@ public class Enemy : MonoBehaviour, IDamagable
     private int _currentWaypointIndex = 0;
 
     private float _totalDistance;
+    private GameManager _gameManager;
 
     private void Awake()
     {
@@ -31,6 +32,7 @@ public class Enemy : MonoBehaviour, IDamagable
         _agent.updateRotation = false;
 
         _agent.avoidancePriority = Mathf.RoundToInt(_agent.speed * 10);
+        _gameManager = FindAnyObjectByType<GameManager>();
     }
 
     private void Start()
@@ -145,6 +147,13 @@ public class Enemy : MonoBehaviour, IDamagable
     }
 
     private void Die()
+    {
+        _spawnPortal.RemoveActiveEnemy(gameObject);
+        _gameManager.UpdateCurrency(1);
+        Destroy(gameObject);
+    }
+
+    public void DestroyEnemy()
     {
         _spawnPortal.RemoveActiveEnemy(gameObject);
         Destroy(gameObject);
