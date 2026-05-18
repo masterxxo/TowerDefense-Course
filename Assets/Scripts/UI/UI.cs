@@ -16,7 +16,7 @@ public class UI : MonoBehaviour
         _uiInGame = GetComponentInChildren<UI_InGame>(true);
         
         SwitchTo(_uiSettings.gameObject);
-        // SwitchTo(_mainMenu.gameObject);
+        //SwitchTo(_mainMenu.gameObject);
         SwitchTo(_uiInGame.gameObject);
     }
 

@@ -26,4 +26,27 @@ public class UI_Animator : MonoBehaviour
         
         rectTransform.anchoredPosition = targetPosition;
     }
+
+    public void ChangeScale(Transform transformObj, float targetScale, float duration = .25f)
+    {
+        RectTransform rectTransform = transformObj.GetComponent<RectTransform>();
+        StartCoroutine(ChangeScaleCo(rectTransform, targetScale, duration));
+    }
+
+    public IEnumerator ChangeScaleCo(RectTransform rectTransform, float newScale, float duration = .25f)
+    {
+        float time = 0;
+        
+        Vector3 initialScale = rectTransform.localScale;
+        Vector3 targetScale = new Vector3(newScale, newScale, newScale);
+
+        while (time < duration)
+        {
+            rectTransform.localScale = Vector3.Lerp(initialScale, targetScale, time/duration);
+            time += Time.deltaTime;
+            yield return null;
+        }
+        
+        rectTransform.localScale = targetScale;
+    }
 }
