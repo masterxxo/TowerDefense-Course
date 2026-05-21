@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UI_Animator : MonoBehaviour
 {
@@ -48,5 +49,28 @@ public class UI_Animator : MonoBehaviour
         }
         
         rectTransform.localScale = targetScale;
+    }
+
+    public void ChangeColor(Image image, float targetAlpha, float duration = 1f)
+    {
+        StartCoroutine(ChangeColorCo(image, targetAlpha, duration));
+    }
+
+    private IEnumerator ChangeColorCo(Image image, float targetAlpha, float duration)
+    {
+        float time = 0;
+        Color currentColor = image.color;
+        float startAlpha = currentColor.a;
+
+        while (time < duration)
+        {
+            float alpha = Mathf.Lerp(startAlpha, targetAlpha, time/duration);
+            image.color = new Color(currentColor.r, currentColor.g, currentColor.b, alpha);
+            
+            time += Time.deltaTime;
+            yield return null;
+        }
+        
+        image.color = new Color(currentColor.r, currentColor.g, currentColor.b, targetAlpha);
     }
 }
